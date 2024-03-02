@@ -54,19 +54,6 @@ function App() {
     setEnd(dayjs().add(1, 'hour'));
   }
 
-  function displayTasks() {
-    return tasks.map(task => (
-      <div key={task.id} className="task">
-        <h3>{task.name}</h3>
-        <p>Description: {task.description}</p>
-        <p>Start: {dayjs(task.start).format('YYYY-MM-DD HH:mm')}</p>
-        <p>End: {dayjs(task.end).format('YYYY-MM-DD HH:mm')}</p>
-        <p>Priority: {task.priority}</p>
-        <p>Status: {task.status}</p>
-      </div>
-    ));
-  }
-
   return (
     <div className="App">
       <div className="container">
