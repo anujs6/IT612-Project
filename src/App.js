@@ -5,6 +5,7 @@ import * as dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import TextField from '@mui/material/TextField';
+import Tasks from "./Tasks";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -83,7 +84,7 @@ function App() {
             </select>
             <button onClick={addTask} className="button">Add Task</button>
             <button onClick={signOut} className="button">Sign Out</button>
-            {displayTasks()}
+            <Tasks tasks={tasks} />
           </>
         ) : (
           <button onClick={googleSignIn} className="button">Sign in with Google</button>
