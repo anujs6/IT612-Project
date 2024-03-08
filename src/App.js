@@ -3,9 +3,9 @@ import './App.css';
 import { useSession, useSupabaseClient, useSessionContext } from '@supabase/auth-helpers-react';
 import * as dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { LocalizationProvider, } from '@mui/x-date-pickers';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import TextField from '@mui/material/TextField';
-import Tasks from "./Tasks";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -26,7 +26,11 @@ function App() {
   async function googleSignIn() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        scopes: 'https://www.googleapis.com/auth/calendar'
+      }
     });
+
     if (error) {
       alert("Error logging in with Google");
       console.error(error);
@@ -37,22 +41,95 @@ function App() {
     await supabase.auth.signOut();
   }
 
-  function addTask() {
+  async function addTask() {
+    const event = {
+      'summary': eventName, 
+      'description': eventDescription,
+      'start': {
+        'dateTime': start.toISOString(),
+        'timeZone': Intl.DateTimeFormat().resolvedOptions().timeZone
+      },
+      'end': {
+        'dateTime': end.toISOString(),
+        'timeZone': Intl.DateTimeFormat().resolvedOptions().timeZone
+      }
+    };
+  
+    const response = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+      method: "POST",
+      headers: {
+        'Authorization': 'Bearer ' + session.provider_token, 
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(event)
+    });
+
+    const eventData = await response.json();
+
     const newTask = {
       id: tasks.length + 1,
-      name: eventName,
       description: eventDescription,
       start: start.toISOString(),
       end: end.toISOString(),
       priority,
-      status: "Pending"
+      status: "Pending",
+      googleEventId: eventData.id 
     };
+
     setTasks([...tasks, newTask]);
-    // Reset form fields after adding a task
     setEventName("");
     setEventDescription("");
     setStart(dayjs());
     setEnd(dayjs().add(1, 'hour'));
+  }
+
+  async function deleteTask(taskId) {
+    const taskIndex = tasks.findIndex(task => task.id === taskId);
+    if (taskIndex === -1) return;
+
+    const task = tasks[taskIndex];
+    if (task.googleEventId) {
+      await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${task.googleEventId}`, {
+        method: "DELETE",
+        headers: {
+          'Authorization': 'Bearer ' + session.provider_token
+        }
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to delete event from Google Calendar');
+        }
+      }).catch(error => {
+        console.error("Error deleting event from Google Calendar:", error);
+      });
+    }
+
+    const newTasks = [...tasks];
+    newTasks.splice(taskIndex, 1);
+    setTasks(newTasks);
+  }
+
+ async function completeTask(taskId) {
+    setTasks(tasks.map(task => {
+      if (task.id === taskId) {
+        return { ...task, status: "Completed" };
+      }
+      return task;
+    }));
+  }
+
+  function displayTasks() {
+    return tasks.map(task => (
+      <div key={task.id} className="task">
+        <h3>{task.name}</h3>
+        <p>Description: {task.description}</p>
+        <p>Start: {dayjs(task.start).format('YYYY-MM-DD HH:mm')}</p>
+        <p>End: {dayjs(task.end).format('YYYY-MM-DD HH:mm')}</p>
+        <p>Priority: {task.priority}</p>
+        <p>Status: {task.status}</p>
+        <button onClick={() => deleteTask(task.id)} className="button">Delete Task</button>
+        <button onClick={() => completeTask(task.id)} className="button">Mark as Completed</button>
+      </div>
+    ));
   }
 
   return (
@@ -62,14 +139,14 @@ function App() {
           <>
             <h2>Welcome, {session.user.email}</h2>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Start Date"
+              <DateTimePicker
+                label="Start Date Time"
                 value={start}
                 onChange={(newValue) => setStart(newValue)}
                 renderInput={(params) => <TextField {...params} />}
               />
-              <DatePicker
-                label="End Date"
+              <DateTimePicker
+                label="End Date Time"
                 value={end}
                 onChange={(newValue) => setEnd(newValue)}
                 renderInput={(params) => <TextField {...params} />}
@@ -84,7 +161,7 @@ function App() {
             </select>
             <button onClick={addTask} className="button">Add Task</button>
             <button onClick={signOut} className="button">Sign Out</button>
-            <Tasks tasks={tasks} />
+            {displayTasks()}
           </>
         ) : (
           <button onClick={googleSignIn} className="button">Sign in with Google</button>
@@ -93,5 +170,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
