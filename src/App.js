@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import './App.css';
 import { useSession, useSupabaseClient, useSessionContext } from '@supabase/auth-helpers-react';
 import * as dayjs from 'dayjs';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider, } from '@mui/x-date-pickers';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import TextField from '@mui/material/TextField';
-import  Button  from './Button';
-import Tasks from './Tasks'; 
+import LoadingComponent from './LoadingComponent';
+import ErrorComponent from './ErrorComponent';
+
+const SignIn = React.lazy(() => import('./SignIn'));
+const TaskForm = React.lazy(() => import('./TaskForm'));
+const Tasks = React.lazy(() => import('./Tasks'));
+
+
 
 
 function App() {
@@ -17,31 +19,40 @@ function App() {
   const [eventName, setEventName] = useState("");
   const [eventDescription, setEventDescription] = useState("");
   const [priority, setPriority] = useState("Normal");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const session = useSession();
   const supabase = useSupabaseClient();
-  const { isLoading } = useSessionContext();
+  const { isLoading: isSessionLoading } = useSessionContext();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingComponent message="Please wait..." />;
   }
 
   async function googleSignIn() {
+    setIsLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        scopes: 'https://www.googleapis.com/auth/calendar'
-      }
+      options: { scopes: 'https://www.googleapis.com/auth/calendar' },
     });
 
     if (error) {
-      alert("Error logging in with Google");
-      console.error(error);
+      console.error("Error logging in with Google:", error.message);
+      setError("Error logging in with Google");
     }
+    setIsLoading(false);
   }
 
+
   async function signOut() {
-    await supabase.auth.signOut();
+    setIsLoading(true);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error.message);
+      setError("Error signing out");
+    }
+    setIsLoading(false);
   }
 
   async function addTask() {
@@ -120,40 +131,39 @@ function App() {
     }));
   }
 
+  if (isSessionLoading || isLoading) {
+    return <LoadingComponent message="Loading, please wait..." />;
+  }
+
+
   return (
     <div className="App">
       <div className="container">
-        {session ? (
-          <>
-            <h2>Welcome, {session.user.email}</h2>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateTimePicker
-                label="Start Date Time"
-                value={start}
-                onChange={(newValue) => setStart(newValue)}
-                renderInput={(params) => <TextField {...params} />}
+        {error && <ErrorComponent errorMessage={error} />}
+        <Suspense fallback={<LoadingComponent message="Loading, please wait..." />}>
+          {!session ? (
+            <SignIn onSignIn={googleSignIn} />
+          ) : (
+            <>
+              <h2>Welcome, {session.user.email}</h2>
+              <TaskForm
+                start={start}
+                end={end}
+                setStart={setStart}
+                setEnd={setEnd}
+                eventName={eventName}
+                setEventName={setEventName}
+                eventDescription={eventDescription}
+                setEventDescription={setEventDescription}
+                priority={priority}
+                setPriority={setPriority}
+                onAddTask={addTask}
               />
-              <DateTimePicker
-                label="End Date Time"
-                value={end}
-                onChange={(newValue) => setEnd(newValue)}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
-            <input type="text" placeholder="Event Name" value={eventName} onChange={(e) => setEventName(e.target.value)} className="input" />
-            <input type="text" placeholder="Event Description" value={eventDescription} onChange={(e) => setEventDescription(e.target.value)} className="input" />
-            <select value={priority} onChange={(e) => setPriority(e.target.value)} className="input">
-              <option value="High">High</option>
-              <option value="Normal">Normal</option>
-              <option value="Low">Low</option>
-            </select>
-            <Button onClick={addTask} name = "Add Task"/>
-            <Button onClick={signOut} name = "Sign Out"/>
-            <Tasks tasks={tasks} deleteTask={deleteTask} completeTask={completeTask} />
-          </>
-        ) : (
-          <button onClick={googleSignIn} className="button">Sign in with Google</button>
-        )}
+              <Tasks tasks={tasks} deleteTask={deleteTask} completeTask={completeTask} />
+              <button onClick={signOut} className="button">Sign Out</button>
+            </>
+          )}
+        </Suspense>
       </div>
     </div>
   );

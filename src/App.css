@@ -1,54 +1,62 @@
-.App {
-  text-align: center;
-  font-family: 'Arial', sans-serif;
-}
-
+/* App.css */
 .container {
   max-width: 600px;
-  margin: 40px auto;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #f9f9f9;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.header {
-  margin-bottom: 20px;
-}
-
-.input, .datetime-picker {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
+h2 {
+  color: #333;
+  text-align: center;
 }
 
 .button {
-  width: 100%;
-  padding: 10px;
+  display: inline-block;
+  background-color: #007bff;
+  color: #ffffff;
+  padding: 10px 20px;
   margin: 10px 0;
   border: none;
-  border-radius: 4px;
-  background-color: #007bff;
-  color: white;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .button:hover {
   background-color: #0056b3;
 }
 
-.task {
-  text-align: left;
-  margin-top: 20px;
+.input,
+select {
+  width: 100%;
   padding: 10px;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 
-.task + .task {
-  margin-top: 10px;
+.task {
+  border: 1px solid #eee;
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.task h3 {
+  margin-top: 0;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  color: #ff0000;
 }
