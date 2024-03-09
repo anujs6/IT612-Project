@@ -6,8 +6,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, } from '@mui/x-date-pickers';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import TextField from '@mui/material/TextField';
-import Tasks from './Tasks.js';
-import Button from './Button.js';
+import Tasks from './Tasks';
+import Button from './Button';
 
 function App() {
   const [tasks, setTasks] = useState([]);
