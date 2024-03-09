@@ -6,6 +6,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, } from '@mui/x-date-pickers';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import TextField from '@mui/material/TextField';
+import Tasks from './Tasks.js';
+import Button from './Button.js';
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -159,8 +161,8 @@ function App() {
               <option value="Normal">Normal</option>
               <option value="Low">Low</option>
             </select>
-            <button onClick={addTask} className="button">Add Task</button>
-            <button onClick={signOut} className="button">Sign Out</button>
+            <Button onClick={addTask} name="Add Task" />
+            <Button onClick={signOut} name="Sign Out" />
             {displayTasks()}
           </>
         ) : (
