@@ -6,8 +6,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, } from '@mui/x-date-pickers';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import TextField from '@mui/material/TextField';
-import Tasks from './Tasks';
-import Button from './Button';
+import  Button  from './Button';
+import Tasks from './Tasks'; 
+
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -146,9 +147,9 @@ function App() {
               <option value="Normal">Normal</option>
               <option value="Low">Low</option>
             </select>
-            <Button onClick={addTask} name="Add Task" />
-            <Button onClick={signOut} name="Sign Out" />
-            <Tasks tasks={tasks} />
+            <Button onClick={addTask} name = "Add Task"/>
+            <Button onClick={signOut} name = "Sign Out"/>
+            <Tasks tasks={tasks} deleteTask={deleteTask} completeTask={completeTask} />
           </>
         ) : (
           <button onClick={googleSignIn} className="button">Sign in with Google</button>
