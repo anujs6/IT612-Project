@@ -11,6 +11,8 @@ export default function Tasks({tasks}) {
         <p>End: {dayjs(task.end).format('YYYY-MM-DD HH:mm')}</p>
         <p>Priority: {task.priority}</p>
         <p>Status: {task.status}</p>
+        <button onClick={() => deleteTask(task.id)} className="button">Delete Task</button>
+        <button onClick={() => completeTask(task.id)} className="button">Mark as Completed</button>
       </div>
     ));
   }
