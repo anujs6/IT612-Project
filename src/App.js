@@ -119,21 +119,6 @@ function App() {
     }));
   }
 
-  function displayTasks() {
-    return tasks.map(task => (
-      <div key={task.id} className="task">
-        <h3>{task.name}</h3>
-        <p>Description: {task.description}</p>
-        <p>Start: {dayjs(task.start).format('YYYY-MM-DD HH:mm')}</p>
-        <p>End: {dayjs(task.end).format('YYYY-MM-DD HH:mm')}</p>
-        <p>Priority: {task.priority}</p>
-        <p>Status: {task.status}</p>
-        <button onClick={() => deleteTask(task.id)} className="button">Delete Task</button>
-        <button onClick={() => completeTask(task.id)} className="button">Mark as Completed</button>
-      </div>
-    ));
-  }
-
   return (
     <div className="App">
       <div className="container">
@@ -163,7 +148,7 @@ function App() {
             </select>
             <Button onClick={addTask} name="Add Task" />
             <Button onClick={signOut} name="Sign Out" />
-            {displayTasks()}
+            <Tasks tasks={tasks} />
           </>
         ) : (
           <button onClick={googleSignIn} className="button">Sign in with Google</button>
